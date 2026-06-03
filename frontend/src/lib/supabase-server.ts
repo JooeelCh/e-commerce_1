@@ -13,7 +13,7 @@ export async function createSupabaseServer() {
                     try {
                         cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
                     } catch {
-                        console.error("Error al establecer las cookies de Supabase en el servidor")
+                        
                     }
                 }
             }

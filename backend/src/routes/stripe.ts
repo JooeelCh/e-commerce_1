@@ -17,10 +17,15 @@ const supabase = createClient(
 router.post("/create-checkout-session",authMiddleware, async (req: Request, res: Response) => {
     try {
         const userId = req.user?.sub
-        const { items } = req.body
+        const { items } = req.body ?? {}
 
         if (!userId || !items?.length) {
             res.status(400).json({ error: "Faltan datos requeridos" })
+            return
+        }
+
+        if (!items?.length) {
+            res.status(400).json({ error: "El carrito está vacío" })
             return
         }
 
