@@ -4,6 +4,7 @@ import type { Router as RouterType } from "express";
 import type { Request, Response } from "express";
 import { stripe } from "../lib/stripe.js";
 import { createClient } from "@supabase/supabase-js";
+import { authMiddleware } from "../middlewares/auth.js";
 import type Stripe from "stripe";
 
 const router: RouterType = Router()
@@ -13,10 +14,10 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_KEY!
 )
 
-router.post("/create-checkout-session", async (req: Request, res: Response) => {
-    console.log('Body recibido:', req.body)
+router.post("/create-checkout-session",authMiddleware, async (req: Request, res: Response) => {
     try {
-        const { userId, items } = req.body
+        const userId = req.user?.sub
+        const { items } = req.body
 
         if (!userId || !items?.length) {
             res.status(400).json({ error: "Faltan datos requeridos" })
@@ -46,7 +47,6 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
             cancel_url: `${process.env.FRONTEND_URL}/cart`,
             metadata: { userId }
         })
-        console.log('Session creada:', session.id)
 
         const total = items.reduce((acc: number, item: {
             product: { price: number }
@@ -59,8 +59,6 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
             status: "pending",
             stripe_session_id: session.id
         })
-        console.log('Error al insertar orden:', orderError)
-
         res.json({ url: session.url })
     } catch (err) {
         console.error(err)
