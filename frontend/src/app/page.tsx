@@ -1,5 +1,6 @@
 import { createSupabaseServer } from "@/lib/supabase-server"
 import ProductCard from "@/components/ProductCard"
+import AddToCartButton from "@/components/AddToCartButton"
 
 async function HomePage() {
 
@@ -16,7 +17,10 @@ async function HomePage() {
             <h1 className="text-3xl font-semibold mb-8">Catalogo</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map(product => (
-                    <ProductCard key={product.id} product={product} />
+                    <div key={product.id}>
+                        <ProductCard key={product.id} product={product}></ProductCard>
+                        <AddToCartButton product={product} />
+                    </div>
                 ))}
             </div>
         </main>

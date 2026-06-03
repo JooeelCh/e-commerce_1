@@ -58,12 +58,31 @@ router.post("/create-checkout-session",authMiddleware, async (req: Request, res:
             quantity: number
         }) => acc + item.product.price * item.quantity, 0)
 
-        const { error: orderError } =await supabase.from("orders").insert({
-            user_id: userId,
-            total,
-            status: "pending",
-            stripe_session_id: session.id
-        })
+        const { data: order, error: orderError } = await supabase.from("orders").insert({ user_id: userId, total, status: "pending", stripe_session_id: session.id }).select().single()
+        
+        if (orderError || !order) {
+            console.error("Error insertando orden", orderError)
+            res.status(500).json({ error: "Error al crear la orden" })
+            return
+        }
+
+        const orderItems = items.map((item: {
+            product_id: string
+            product: { price: number }
+            quantity: number
+        }) => ({
+            order_id: order.id,
+            product_id: item.product_id,
+            quantity: item.quantity,
+            unit_price: item.product.price
+        }))
+
+        const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
+
+        if (itemsError) {
+            console.error("Error insertando order_items", itemsError)
+        }
+
         res.json({ url: session.url })
     } catch (err) {
         console.error(err)
