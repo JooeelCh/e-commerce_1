@@ -64,8 +64,18 @@ router.post("/create-checkout-session",authMiddleware, async (req: Request, res:
             quantity: number
         }) => acc + item.product.price * item.quantity, 0)
         
-        const { data: order, error: orderError } = await supabase.from("orders").insert({ user_id: userId, total, status: "pending", stripe_session_id: null }).select().single()
+        const { data: order, error: orderError } = await supabase
+            .from("orders")
+            .insert({ user_id: userId, total, status: "pending", stripe_session_id: null })
+            .select()
+            .single()
         
+        if (orderError || !order) {
+            console.error("Error insertando orden", orderError)
+            res.status(500).json({ error: "Error al crear la orden" })
+            return
+        }
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: lineItems,
@@ -77,11 +87,6 @@ router.post("/create-checkout-session",authMiddleware, async (req: Request, res:
 
         await supabase.from("orders").update({ stripe_session_id: session.id }).eq("id", order.id)
 
-        if (orderError || !order) {
-            console.error("Error insertando orden", orderError)
-            res.status(500).json({ error: "Error al crear la orden" })
-            return
-        }
 
         
         const orderItems = items.map((item: {
@@ -124,8 +129,7 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req: R
         const session = event.data.object as Stripe.Checkout.Session
         const { userId, orderId } = session.metadata ?? {}
 
-        console.log('Webhook recibido - orderId:', orderId)
-        console.log('Webhook recibido - userId:', userId)
+        console.log('orderId del webhook:', orderId)
 
         await supabase.from("orders").update({ status: "paid" }).eq("stripe_session_id", session.id)
         await supabase.from("cart_items").delete().eq("user_id", userId)
@@ -135,7 +139,7 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req: R
             .select("product_id, quantity")
             .eq("order_id", orderId)
 
-        console.log('orderItems encontrados:', orderItems)
+        console.log('orderItems:', orderItems)
         console.log('itemsError:', itemsError)
 
         if (orderItems) {
@@ -144,7 +148,7 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req: R
                     p_product_id: item.product_id,
                     p_amount: item.quantity
                 })
-                console.log('stockError para', item.product_id, ':', stockError)
+                console.log('stockError:', stockError)
             }
         }
     }
