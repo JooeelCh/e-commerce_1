@@ -140,7 +140,7 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req: R
 
         if (orderItems) {
             for (const item of orderItems) {
-                const { error: stockError} = await supabase.rpc("decrease_stock", {
+                const { error: stockError} = await supabase.rpc("decrement_stock", {
                     p_product_id: item.product_id,
                     p_amount: item.quantity
                 })
