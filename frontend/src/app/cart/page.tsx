@@ -9,7 +9,7 @@ function CartPage() {
     const [userId, setUserId] = useState<string | null>(null)
     const [checkoutLoading, setCheckoutLoading] = useState(false)
     const [checkoutError, setCheckoutError] = useState<string | null>(null)
-    const { cart, loading: cartLoading, removeFromCart, total } = useCart(userId)
+    const { cart, loading: cartLoading, removeFromCart, updateQuantity, total } = useCart(userId)
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
@@ -75,9 +75,24 @@ function CartPage() {
                     <div key={item.id} className="flex items-center justify-between border-b pb-4">
                         <div>
                             <p className="font-medium">{item.product.name}</p>
-                            <p className="text-sm text-gray-500">Cantidad: {item.quantity}</p>
+                            <p className="text-sm text-gray-400">{item.product.price.toFixed(2)} C/U</p>
                         </div>
                         <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 border botder-gray-200">
+                                <button 
+                                    onClick={() => updateQuantity(item.id, item.quantity - 1)} 
+                                    className="px-3 py-1 text-gray-500 hover:text-black transition-colors"
+                                >
+                                    -
+                                </button>
+                                <span className="w-6 text-center text-sm font-medium">{item.quantity}</span>
+                                <button
+                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                    className="px-3 py-1 text-gray-500 hover:text-black transition-colors"
+                                >
+                                    +
+                                </button>
+                            </div>
                             <span>${(item.product.price * item.quantity).toFixed(2)}</span>
                             <button onClick={() => removeFromCart(item.id)} className="text-red-500 text-sm hover:underline">
                                 Eliminar
@@ -91,7 +106,11 @@ function CartPage() {
                     <p className="text-red-500 text-sm text-center">{checkoutError}</p>
                 )}
                 <span className="text-xl font-semibold">Total: ${total.toFixed(2)}</span>
-                <button onClick={handleCheckout} disabled={checkoutLoading} className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50">
+                <button 
+                    onClick={handleCheckout} 
+                    disabled={checkoutLoading} 
+                    className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
                     {checkoutLoading ? "Procesando..." : `Pagar $${total.toFixed(2)}`}
                 </button>
             </div>

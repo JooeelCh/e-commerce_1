@@ -46,6 +46,17 @@ export function useCart(userId: string | null) {
     fetchCart()
   }
 
+  async function updateQuantity(cartItemdId: string, quantity: number) {
+    if (quantity <= 0) {
+      await removeFromCart(cartItemdId)
+      return
+    }
+
+    await supabase.from("cart_items").update({ quantity }).eq("id", cartItemdId)
+
+    fetchCart()
+  }
+
   async function removeFromCart(cartItemId: string) {
     await supabase.from('cart_items').delete().eq('id', cartItemId)
     fetchCart()
@@ -58,5 +69,5 @@ export function useCart(userId: string | null) {
 
   const total = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0)
 
-  return { cart, loading, addToCart, removeFromCart, clearCart, total }
+  return { cart, loading, addToCart, updateQuantity, removeFromCart, clearCart, total }
 }
