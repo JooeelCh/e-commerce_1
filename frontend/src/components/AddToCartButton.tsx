@@ -23,6 +23,14 @@ function AddToCartButton({ product }: { product: Product }) {
         )
     }
 
+    if (product.stock === 0) {
+        return (
+            <button disabled className="mt-6 w-full bg-gray-200 text-gray-400 py-3 rounded-lg cursor-not-allowed">
+                Sin stock
+            </button>
+        )
+    }
+
     return (
         <button onClick={() => addToCart(product.id)} className="mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors w-full">
             Agregar al carrito

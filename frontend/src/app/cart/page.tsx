@@ -8,6 +8,7 @@ import Link from "next/link"
 function CartPage() {
     const [userId, setUserId] = useState<string | null>(null)
     const [checkoutLoading, setCheckoutLoading] = useState(false)
+    const [checkoutError, setCheckoutError] = useState<string | null>(null)
     const { cart, loading: cartLoading, removeFromCart, total } = useCart(userId)
 
     useEffect(() => {
@@ -19,6 +20,7 @@ function CartPage() {
     async function handleCheckout() {
         if (!userId) return
         setCheckoutLoading(true)
+        setCheckoutError(null)
 
         try {
             const { data: { session } } = await supabase.auth.getSession()
@@ -35,10 +37,14 @@ function CartPage() {
             })
 
             const { url, error } = await res.json()
-            if (error) throw new Error(error)
+            if (error) {
+                setCheckoutError(error)
+                return
+            }
             window.location.href = url
         } catch (err) {
             console.error(err)
+            setCheckoutError("Error al procesar el pago. Intenta nuevamente.")
         } finally {
             setCheckoutLoading(false)
         }
@@ -81,6 +87,9 @@ function CartPage() {
                 ))}
             </div>
             <div className="mt-6 flex items-center justify-between">
+                {checkoutError && (
+                    <p className="text-red-500 text-sm text-center">{checkoutError}</p>
+                )}
                 <span className="text-xl font-semibold">Total: ${total.toFixed(2)}</span>
                 <button onClick={handleCheckout} disabled={checkoutLoading} className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50">
                     {checkoutLoading ? "Procesando..." : `Pagar $${total.toFixed(2)}`}
