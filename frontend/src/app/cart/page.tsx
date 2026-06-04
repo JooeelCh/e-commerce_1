@@ -101,18 +101,20 @@ function CartPage() {
                     </div>
                 ))}
             </div>
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-6 flex flex-col gap-3">
                 {checkoutError && (
-                    <p className="text-red-500 text-sm text-center">{checkoutError}</p>
+                    <p className="text-red-500 text-sm text-center bg-red-50 py-2 px-4 rounded-lg">{checkoutError}</p>
                 )}
-                <span className="text-xl font-semibold">Total: ${total.toFixed(2)}</span>
-                <button 
-                    onClick={handleCheckout} 
-                    disabled={checkoutLoading} 
-                    className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                    {checkoutLoading ? "Procesando..." : `Pagar $${total.toFixed(2)}`}
-                </button>
+                <div className="flex items-center justify-between">
+                    <span className="text-xl font-semibold">Total: ${total.toFixed(2)}</span>
+                    <button 
+                        onClick={handleCheckout} 
+                        disabled={checkoutLoading} 
+                        className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    >
+                        {checkoutLoading ? "Procesando..." : `Pagar $${total.toFixed(2)}`}
+                    </button>
+                </div>
             </div>
         </main>
     )
