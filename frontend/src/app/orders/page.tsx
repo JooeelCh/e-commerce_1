@@ -33,17 +33,21 @@ async function OrdersPage() {
                             </div>
                             
                             <div className="space-y-2 border-t border-gray-100 pt-4">
-                                {order.order_items.map(item => (
-                                    <div key={item.id} className="flex items-center justify-between text-sm">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-500">x{item.quantity}</span>
-                                            <span>{item.product.name}</span>
+                                {(order.order_items ?? []).length > 0 ? (
+                                    (order.order_items ?? []).map(item => (
+                                        <div key={item.id} className="flex items-center justify-between text-sm">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-500">x{item.quantity}</span>
+                                                <span>{item.product.name}</span>
+                                            </div>
+                                            <span className="text-gray-500">
+                                                ${(item.unit_price * item.quantity).toFixed(2)}
+                                            </span>
                                         </div>
-                                        <span className="text-gray-500">
-                                            ${(item.unit_price * item.quantity).toFixed(2)}
-                                        </span>
-                                    </div>
-                                ))}
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-gray-400">Sin detalle disponible</p>
+                                )}
                             </div>
                         </div>
                     ))}

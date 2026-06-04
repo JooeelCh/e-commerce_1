@@ -29,6 +29,6 @@ export type Order = {
     total: number
     status: string
     stripe_session_id: string | null
-    order_items: OrderItem[]
+    order_items: OrderItem[] | null
     created_at: string
 }
