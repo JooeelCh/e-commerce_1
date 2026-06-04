@@ -124,13 +124,19 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req: R
         const session = event.data.object as Stripe.Checkout.Session
         const { userId, orderId } = session.metadata ?? {}
 
+        console.log('Webhook recibido - orderId:', orderId)
+        console.log('Webhook recibido - userId:', userId)
+
         await supabase.from("orders").update({ status: "paid" }).eq("stripe_session_id", session.id)
         await supabase.from("cart_items").delete().eq("user_id", userId)
 
-        const { data: orderItems } = await supabase
+        const { data: orderItems, error: itemsError } = await supabase
             .from("order_items")
             .select("product_id, quantity")
             .eq("order_id", orderId)
+
+        console.log('orderItems encontrados:', orderItems)
+        console.log('itemsError:', itemsError)
 
         if (orderItems) {
             for (const item of orderItems) {
@@ -138,6 +144,7 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req: R
                     p_product_id: item.product_id,
                     p_amount: item.quantity
                 })
+                console.log('stockError para', item.product_id, ':', stockError)
             }
         }
     }
