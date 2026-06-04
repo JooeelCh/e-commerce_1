@@ -15,6 +15,9 @@ const supabase = createClient(
 )
 
 router.post("/create-checkout-session",authMiddleware, async (req: Request, res: Response) => {
+    console.log('--- create-checkout-session llamado ---')
+    console.log('userId:', req.user?.sub)
+    console.log('items:', JSON.stringify(req.body?.items?.length))
     try {
         const userId = req.user?.sub
         const { items } = req.body ?? {}
